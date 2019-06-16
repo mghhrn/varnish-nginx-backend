@@ -1,0 +1,15 @@
+
+# create network
+docker network create --driver=bridge bp-nginx-varnish-net
+
+# create images 
+docker build -t backendb .
+docker build -t mynginx .
+docker build -t varnish .
+
+
+docker run --name backendb -p 9000:9000 -v /home/mghhrn/temp/bpfiles:/bpfiles --network=bp-nginx-varnish-net --rm  backendb
+
+docker run --name mynginx -p 8080:80 --network=bp-nginx-varnish-net -v /home/mghhrn/temp/bpfiles:/bpfiles -v /home/mghhrn/docker/bp-varnish-nginx/nginx/nginx.conf:/etc/nginx/nginx.conf -v /home/mghhrn/docker/bp-varnish-nginx/nginx/backendb.conf:/etc/nginx/conf.d/backendb.conf --rm  mynginx
+
+docker run --name varnish -p 80:80 --network=bp-nginx-varnish-net -v /home/mghhrn/docker/bp-varnish-nginx/varnish/default.vcl:/etc/varnish/default.vcl --rm  varnish 
